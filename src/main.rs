@@ -64,6 +64,10 @@ fn main() {
         )
         .get_matches();
 
+    if matches.is_present("configure") {
+        println!("Creating config file in ~/.config/cliban.toml");
+    }
+
     // You can check the value provided by positional arguments, or option arguments
     if let Some(c) = matches.value_of("config") {
         println!("Value for config: {}", c);
