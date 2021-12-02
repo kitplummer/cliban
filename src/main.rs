@@ -1,4 +1,20 @@
 use clap::{App, Arg};
+use serde::Deserialize;
+use std::fs;
+
+#[derive(Deserialize)]
+struct Config {
+    cliban_data: String,
+    repaint: bool,
+}
+
+fn read_config(path: &str) {
+    println!("CONFIG: {}", path);
+    let file_contents = fs::read_to_string(path)
+            .expect("Something went wrong reading the file");
+    let config: Config = toml::from_str(&file_contents).unwrap();
+    println!("cliban_data: {} - repaint: {}", config.cliban_data, config.repaint);
+}
 
 fn main() {
 
@@ -67,7 +83,20 @@ fn main() {
     if matches.is_present("configure") {
         println!("Creating config file in ~/.config/cliban.toml");
     }
+    
+    let home_dir = home::home_dir();
 
+    let mut filename = home_dir
+        .as_ref()
+        .and_then(|name| name.to_str())
+        .unwrap_or("default")
+        .to_owned();
+
+    let config_file: &str = "/.config/cliban.toml";
+    
+    filename.push_str(config_file);
+
+    read_config(&filename);
     // You can check the value provided by positional arguments, or option arguments
     if let Some(c) = matches.value_of("config") {
         println!("Value for config: {}", c);
