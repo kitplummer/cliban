@@ -1,3 +1,5 @@
+extern crate exitcode;
+
 use clap::{App, Arg};
 use serde::Deserialize;
 use std::fs;
@@ -9,9 +11,14 @@ struct Config {
 }
 
 fn read_config(path: &str) {
-    println!("CONFIG: {}", path);
-    let file_contents = fs::read_to_string(path)
-            .expect("Something went wrong reading the file");
+    let file_contents = match fs::read_to_string(path) {
+        Ok(contents) => contents,
+        Err(_) => {
+            println!("Couldn't read default config file at ~/.config/cliban.toml");
+            std::process::exit(exitcode::CONFIG);
+        }
+    };
+    
     let config: Config = toml::from_str(&file_contents).unwrap();
     println!("cliban_data: {} - repaint: {}", config.cliban_data, config.repaint);
 }
