@@ -1,123 +1,40 @@
-extern crate exitcode;
+mod cli;
+mod config;
+mod tasks;
 
-use clap::{App, Arg};
-use serde::Deserialize;
-use std::fs;
+use anyhow::anyhow;
+use std::path::PathBuf;
+use structopt::StructOpt;
 
-#[derive(Deserialize)]
-struct Config {
-    cliban_data: String,
-    repaint: bool,
+use cli::{Action::*, CommandLineArgs};
+use tasks::Task;
+
+fn find_default_config_file() -> Option<PathBuf> {
+    home::home_dir().map(|mut path| {
+        path.push(".config/cliban.toml");
+        path
+    })
 }
+fn main() -> anyhow::Result<()> {
+    // Get the command-line args
+    let CommandLineArgs {
+        action,
+        config_file,
+    } = CommandLineArgs::from_args();
 
-fn read_config(path: &str) {
-    let file_contents = match fs::read_to_string(path) {
-        Ok(contents) => contents,
-        Err(_) => {
-            println!("Couldn't read default config file at ~/.config/cliban.toml");
-            std::process::exit(exitcode::CONFIG);
-        }
-    };
-    
-    let config: Config = toml::from_str(&file_contents).unwrap();
-    println!("cliban_data: {} - repaint: {}", config.cliban_data, config.repaint);
-}
+    let config_file = config_file
+        .or_else(find_default_config_file)
+        .ok_or(anyhow!("Failed to read default config file"))?;
+        
+    match action {
+        Configure {} => tasks::create_configuration_file(),
+        Show {} => tasks::show_board(config_file),
+        Add { task } => tasks::add_task(config_file, Task::new(task)),
+        Promote { id } => tasks::promote_task(config_file, id),
+        Regress { id } => tasks::regress_task(config_file, id),
+        Delete { id } => tasks::delete_task(config_file, id),
+    }?;
+//    let config = config::read_config(&filename);
 
-fn main() {
-
-    let matches = App::new("cliban")
-        .version("0.0.1")
-        .author("Kit Plummer <kitplummer@gmail.com>")
-        .about("Personal CLI Kanban")
-        .arg(
-            Arg::new("config")
-                .short('c')
-                .long("config")
-                .value_name("FILE")
-                .about("Sets a custom config file")
-                .takes_value(true),
-        )
-        .subcommand(
-            App::new("configure")
-                .about("Sets up the default configuration file in ~/.config/cliban.toml")
-        )
-        .subcommand(
-            App::new("show")
-                .about("Shows the board")
-        )
-        .subcommand(
-            App::new("add")
-                .about("Creates a new task")
-                .arg(
-                    Arg::new("task")
-                        .about("The task to add")
-                        .index(1)
-                        .required(true),
-                ),
-        )
-        .subcommand(
-            App::new("promote")
-                .about("Promotes a task")
-                .arg(
-                    Arg::new("id")
-                        .about("The task id to promote")
-                        .index(1)
-                        .required(true),
-                ),
-        )
-        .subcommand(
-            App::new("regress")
-                .about("Regress a task")
-                .arg(
-                    Arg::new("id")
-                        .about("The task id to regress")
-                        .index(1)
-                        .required(true),
-                ),
-        )
-        .subcommand(
-            App::new("delete")
-                .about("Deletes a task")
-                .arg(
-                    Arg::new("id")
-                        .about("The task id to delete")
-                        .index(1)
-                        .required(true),
-                ),
-        )
-        .get_matches();
-
-    if matches.is_present("configure") {
-        println!("Creating config file in ~/.config/cliban.toml");
-    }
-    
-    let home_dir = home::home_dir();
-
-    let mut filename = home_dir
-        .as_ref()
-        .and_then(|name| name.to_str())
-        .unwrap_or("default")
-        .to_owned();
-
-    let config_file: &str = "/.config/cliban.toml";
-    
-    filename.push_str(config_file);
-
-    read_config(&filename);
-    // You can check the value provided by positional arguments, or option arguments
-    if let Some(c) = matches.value_of("config") {
-        println!("Value for config: {}", c);
-    }
-
-    // You can check for the existence of subcommands, and if found use their
-    // matches just as you would the top level app
-    if let Some(matches) = matches.subcommand_matches("add") {
-        // "$ myapp test" was run
-        if matches.is_present("task") {
-            // "$ myapp test -l" was run
-            println!("Adding task: {}", matches.value_of("task").unwrap());
-        }
-    }
-
-    // Continued program logic goes here...
+    Ok(())
 }
