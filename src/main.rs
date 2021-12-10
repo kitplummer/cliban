@@ -7,7 +7,6 @@ use std::path::PathBuf;
 use structopt::StructOpt;
 
 use cli::{Action::*, CommandLineArgs};
-use tasks::Task;
 
 fn find_default_config_file() -> Option<PathBuf> {
     home::home_dir().map(|mut path| {
@@ -29,7 +28,7 @@ fn main() -> anyhow::Result<()> {
     match action {
         Configure {} => tasks::create_configuration_file(),
         Show {} => tasks::show_board(config_file),
-        Add { task } => tasks::add_task(config_file, Task::new(task)),
+        Add { task } => tasks::add_task(config_file, task),
         Promote { id } => tasks::promote_task(config_file, id),
         Regress { id } => tasks::regress_task(config_file, id),
         Delete { id } => tasks::delete_task(config_file, id),
