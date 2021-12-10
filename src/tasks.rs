@@ -172,7 +172,39 @@ pub fn regress_task(config_path: PathBuf, id: u32) -> Result<()> {
 
 pub fn delete_task(config_path: PathBuf, id: u32) -> Result<()> {
   let config = config::read_config(&config_path);
-  println!("{}-> data at: {} - repaint: {}", id, config.cliban_data, config.repaint);
+  let expanded_path = shellexpand::tilde(&config.cliban_data);
+  let file = OpenOptions::new()
+    .read(true)
+    .write(true)
+    .create(true)
+    .open(expanded_path.into_owned())?;
+
+  let mut tasks = collect_tasks(&file)?;  let config = config::read_config(&config_path);
+
+  if tasks.is_empty() { 
+    println!("No task with id {} found.", id);
+    process::exit(1);
+  }
+
+  let mut position: usize = 0;
+  for i in 0..tasks.len() {
+    if tasks[i].id == id {
+      position = i;
+    } else {
+      println!("No task with id {} found.", id);
+      process::exit(1);
+    }
+  }
+
+  tasks.remove(position - 0);
+
+  file.set_len(0)?;
+    // Write the modified task list back into the file;
+  serde_json::to_writer(file, &tasks)?;
+
+  if config.repaint {
+    show_board(config_path)?;
+  }
   Ok(())
 } 
 
