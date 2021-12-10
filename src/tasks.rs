@@ -5,6 +5,7 @@ use serde::Serialize;
 use std::fs::{File, OpenOptions};
 use std::io::{Result, Seek, SeekFrom};
 use std::path::PathBuf;
+use std::process;
 
 use crate::config;
 
@@ -14,14 +15,14 @@ pub struct Task {
     pub state: String,
     pub id: u32,
     #[serde(with = "ts_seconds")]
-    pub created_at: DateTime<Utc>,
+    pub updated_at: DateTime<Utc>,
 }
 
 impl Task {
     pub fn new(id: u32, text: String) -> Task {
-        let created_at: DateTime<Utc> = Utc::now();
+        let updated_at: DateTime<Utc> = Utc::now();
         let state = "todo".to_string();
-        Task { text, state, id, created_at }
+        Task { text, state, id, updated_at }
     }
 }
 
@@ -78,34 +79,37 @@ pub fn promote_task(config_path: PathBuf, id: u32) -> Result<()> {
     .open(expanded_path.into_owned())?;
 
   let mut tasks = collect_tasks(&file)?;  let config = config::read_config(&config_path);
+
   let mut position: usize = 0;
   for i in 0..tasks.len() {
     if tasks[i].id == id {
       position = i;
+    } else {
+      println!("Not task with id {} found", id);
+      process::exit(1);
     }
   }
-
   let task = &tasks[position];
-  println!("{}: {}", task.id, task.state);
-
-  let mut new_state = "";
-  match task.state.as_str() {
-    "todo" => new_state = "in-progress",
-    "in-progress" => new_state = "done",
-    "done" => println!("already done."),
-    _ => ()
-  }
+  let new_state = match task.state.as_str() {
+    "todo" => "in-progress",
+    "in-progress" => "done",
+    "done" => {
+      println!("Task {} already done.", task.id);
+      process::exit(1);
+    }
+    _ => {
+      println!("No task found.");
+      process::exit(1);
+    }
+  };
   
   let new_text = &task.text;
   let mut new_task = Task::new(task.id, new_text.to_string());
-  new_task.state = String::from(new_state);
 
   new_task.state = String::from(new_state);
-
   tasks.remove(position - 0);
-
   tasks.push(new_task);
-  //tasks.push(task);
+  file.set_len(0)?;
   serde_json::to_writer(file, &tasks)?;
 
   if config.repaint {
@@ -117,7 +121,52 @@ pub fn promote_task(config_path: PathBuf, id: u32) -> Result<()> {
 
 pub fn regress_task(config_path: PathBuf, id: u32) -> Result<()> {
   let config = config::read_config(&config_path);
-  println!("{}-> data at: {} - repaint: {}", id, config.cliban_data, config.repaint);
+  let expanded_path = shellexpand::tilde(&config.cliban_data);
+  let file = OpenOptions::new()
+    .read(true)
+    .write(true)
+    .create(true)
+    .open(expanded_path.into_owned())?;
+
+  let mut tasks = collect_tasks(&file)?;  let config = config::read_config(&config_path);
+  let mut position: usize = 0;
+  for i in 0..tasks.len() {
+    if tasks[i].id == id {
+      position = i;
+    } else {
+      println!("No task with id {} found.", id);
+      process::exit(1);
+    }
+  }
+
+  let task = &tasks[position];
+
+  let new_state = match task.state.as_str() {
+    "todo" => { 
+      println!("Task {} already in todo.", task.id);
+      process::exit(1);
+    },
+    "in-progress" => "todo",
+    "done" => "in-progress", 
+    _ => {
+      println!("No task found.");
+      process::exit(1);
+    }
+  };
+  
+  let new_text = &task.text;
+  let mut new_task = Task::new(task.id, new_text.to_string());
+  new_task.state = String::from(new_state);
+
+  tasks.remove(position - 0);
+  tasks.push(new_task);
+  file.set_len(0)?;
+  serde_json::to_writer(file, &tasks)?;
+
+  if config.repaint {
+    show_board(config_path)?;
+  }
+
   Ok(())
 } 
 

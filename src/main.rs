@@ -33,7 +33,6 @@ fn main() -> anyhow::Result<()> {
         Regress { id } => tasks::regress_task(config_file, id),
         Delete { id } => tasks::delete_task(config_file, id),
     }?;
-//    let config = config::read_config(&filename);
 
     Ok(())
 }
