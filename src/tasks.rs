@@ -79,7 +79,10 @@ pub fn promote_task(config_path: PathBuf, id: u32) -> Result<()> {
     .open(expanded_path.into_owned())?;
 
   let mut tasks = collect_tasks(&file)?;  let config = config::read_config(&config_path);
-
+  if tasks.is_empty() { 
+    println!("No task with id {} found.", id);
+    process::exit(1);
+  }
   let mut position: usize = 0;
   for i in 0..tasks.len() {
     if tasks[i].id == id {
@@ -129,6 +132,12 @@ pub fn regress_task(config_path: PathBuf, id: u32) -> Result<()> {
     .open(expanded_path.into_owned())?;
 
   let mut tasks = collect_tasks(&file)?;  let config = config::read_config(&config_path);
+
+  if tasks.is_empty() { 
+    println!("No task with id {} found.", id);
+    process::exit(1);
+  }
+
   let mut position: usize = 0;
   for i in 0..tasks.len() {
     if tasks[i].id == id {
