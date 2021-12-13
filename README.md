@@ -2,6 +2,10 @@
 
 refactor of https://github.com/kitplummer/clikan in Rust for portability
 
+## depends on
+
+comfy-table -> https://github.com/Nukesor/comfy-table
+
 # todo
 
 lots!

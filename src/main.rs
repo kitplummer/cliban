@@ -3,17 +3,13 @@ mod config;
 mod tasks;
 
 use anyhow::anyhow;
-use std::path::PathBuf;
 use structopt::StructOpt;
+
+use config::*;
 
 use cli::{Action::*, CommandLineArgs};
 
-fn find_default_config_file() -> Option<PathBuf> {
-    home::home_dir().map(|mut path| {
-        path.push(".config/cliban.toml");
-        path
-    })
-}
+
 fn main() -> anyhow::Result<()> {
     // Get the command-line args
     let CommandLineArgs {

@@ -29,9 +29,7 @@ impl Task {
 }
 
 pub fn create_configuration_file() -> Result<()> {
-  // Write TOML to ~/.config/cliban.toml
-  // cliban_data = "~/.cliban.dat"
-  // repaint = false
+  config::write_default_config().expect("Could not write default config file");
   Ok(())
 }
 
