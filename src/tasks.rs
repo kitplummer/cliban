@@ -30,6 +30,7 @@ impl Task {
 
 pub fn create_configuration_file() -> Result<()> {
   config::write_default_config().expect("Could not write default config file");
+  println!("Wrote the default configuration file at ~/.config/cliban.toml");
   Ok(())
 }
 
