@@ -8,9 +8,13 @@ pub enum Action {
     },
     /// Display the kanban board.
     Show {
+        /// Display as JSON instead of the default table
+        #[structopt(short, long)]
+        json: bool,
     },
     /// Create a new task in ToDo.
     Add {
+    
         /// The task description text.
         #[structopt()]
         task: String

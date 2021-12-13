@@ -34,7 +34,7 @@ pub fn create_configuration_file() -> Result<()> {
   Ok(())
 }
 
-pub fn show_board(config_path: PathBuf) -> Result<()> {
+pub fn show_board(config_path: PathBuf, json: bool) -> Result<()> {
   let config = config::read_config(&config_path);
   let expanded_path = shellexpand::tilde(&config.cliban_data);
   let file = OpenOptions::new()
@@ -43,23 +43,26 @@ pub fn show_board(config_path: PathBuf) -> Result<()> {
     .create(true)
     .open(expanded_path.into_owned())?;
   let tasks = collect_tasks(&file)?;
-
-  let mut table = Table::new();
-  let columns = get_columns(tasks);
-  table
-    .load_preset(UTF8_FULL)
-    .set_content_arrangement(ContentArrangement::Dynamic)
-    .set_header(vec![
-      Cell::new("ToDo").fg(Color::Yellow),
-      Cell::new("In-Progress").fg(Color::Green),
-      Cell::new("Done").fg(Color::Red),
-    ])
-    .add_row(vec![
-      columns.0,
-      columns.1,
-      columns.2,
-    ]);
-  println!("{}", table);
+  if json {
+    println!("{}", serde_json::to_string(&tasks).unwrap());
+  } else {
+    let mut table = Table::new();
+    let columns = get_columns(tasks);
+    table
+      .load_preset(UTF8_FULL)
+      .set_content_arrangement(ContentArrangement::Dynamic)
+      .set_header(vec![
+        Cell::new("ToDo").fg(Color::Yellow),
+        Cell::new("In-Progress").fg(Color::Green),
+        Cell::new("Done").fg(Color::Red),
+      ])
+      .add_row(vec![
+        columns.0,
+        columns.1,
+        columns.2,
+      ]);
+    println!("{}", table);
+  }
   Ok(())
 }
 
@@ -80,7 +83,7 @@ pub fn add_task(config_path: PathBuf, new_task: String) -> Result<()> {
   serde_json::to_writer(file, &tasks)?;
 
   if config.repaint {
-    show_board(config_path)?;
+    show_board(config_path, false)?;
   }
   Ok(())
 }
@@ -140,7 +143,7 @@ pub fn promote_task(config_path: PathBuf, id: u32) -> Result<()> {
   serde_json::to_writer(file, &tasks)?;
 
   if config.repaint {
-    show_board(config_path)?;
+    show_board(config_path, false)?;
   }
 
   Ok(())
@@ -201,7 +204,7 @@ pub fn regress_task(config_path: PathBuf, id: u32) -> Result<()> {
   serde_json::to_writer(file, &tasks)?;
 
   if config.repaint {
-    show_board(config_path)?;
+    show_board(config_path, false)?;
   }
 
   Ok(())
@@ -243,7 +246,7 @@ pub fn delete_task(config_path: PathBuf, id: u32) -> Result<()> {
   serde_json::to_writer(file, &tasks)?;
 
   if config.repaint {
-    show_board(config_path)?;
+    show_board(config_path, false)?;
   }
   Ok(())
 } 

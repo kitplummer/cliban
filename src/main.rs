@@ -23,7 +23,7 @@ fn main() -> anyhow::Result<()> {
         
     match action {
         Configure {} => tasks::create_configuration_file(),
-        Show {} => tasks::show_board(config_file),
+        Show { json } => tasks::show_board(config_file, json),
         Add { task } => tasks::add_task(config_file, task),
         Promote { id } => tasks::promote_task(config_file, id),
         Regress { id } => tasks::regress_task(config_file, id),
