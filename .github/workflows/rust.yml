@@ -11,7 +11,7 @@ env:
 
 jobs:
   build_n_lint:
-
+    
     runs-on: ubuntu-latest
 
     steps:
@@ -22,8 +22,11 @@ jobs:
       run: cargo clippy --verbose
     
   functional_test:
-    
-    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        platform: [ubuntu-latest, macos-latest, windows-latest]
+        rust: [stable]
+    runs-on: ${{ matrix.platform }}
 
     steps:
     - uses: actions/checkout@v2
