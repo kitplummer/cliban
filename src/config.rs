@@ -18,19 +18,38 @@ pub fn read_config(path: &Path) -> Config {
 }
 
 pub fn write_default_config() -> Result<(), ()> {
+    let default_data_path = 
+        home::home_dir().map(|mut path| {
+            path.push(".cliban.json");
+            path
+        })
+        .unwrap()
+        .into_os_string()
+        .into_string()
+        .unwrap();
+        
     let config = Config {
-        cliban_data: String::from("~/.cliban.json"),
+        cliban_data: default_data_path,
         repaint: false,
     };
 
     let toml = toml::to_string(&config).unwrap();
 
-    let config_path = find_default_config_file();
+    let config_path = find_default_config_file().unwrap();
+    let prefix = config_path.parent().unwrap();
+    std::fs::create_dir_all(prefix).unwrap();
+
+    let config_path = 
+        config_path
+        .into_os_string()
+        .into_string()
+        .unwrap();
+
     let mut file = OpenOptions::new()
     .read(true)
     .write(true)
     .create(true)
-    .open(config_path.unwrap())
+    .open(config_path)
     .unwrap();
 
     write!(&mut file, "{}", toml).expect("Could not write default configuration file");
@@ -39,7 +58,8 @@ pub fn write_default_config() -> Result<(), ()> {
 
 pub fn find_default_config_file() -> Option<PathBuf> {
     home::home_dir().map(|mut path| {
-        path.push(".config/cliban.toml");
+        path.push(".config");
+        path.push("cliban.toml");
         path
     })
 }
