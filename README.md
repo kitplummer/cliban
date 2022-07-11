@@ -1,12 +1,10 @@
 # cliban
 
+Personal kanban in the terminal.
+
 refactor of https://github.com/kitplummer/clikan in Rust for portability
 
-## depends on
-
-comfy-table -> https://github.com/Nukesor/comfy-table
-
-# todo
+## todo
 
 lots!
 
@@ -14,6 +12,38 @@ lots!
 * read config (data store) from default location
 * use --config override
 * validate config
-* find a terminaltables replacement - https://github.com/RyanBluth/term-table-rs
-* pick a license and add it
+* release process (including installables for package managers - e.g., winget, homebrew, etc.)
+
+## development, testing and contributing
+
+### depends on
+
+Rust :)
+comfy-table -> https://github.com/Nukesor/comfy-table
+### objectives
+
+* trying to support Windows, macOS, and Linux distributions
+* automate all the delivery bits
+* functional tests for everything
+
+### dev env
+
+* build debug version -> `cargo build`
+* build release version -> `cargo build --release`
+* test -> `cargo test`
+
+
+## license
+
+MIT - https://mit-license.org
+
+```
+Copyright © 2022 <Kit Plummer>
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the “Software”), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+```
 

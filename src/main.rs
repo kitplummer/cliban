@@ -9,7 +9,6 @@ use config::*;
 
 use cli::{Action::*, CommandLineArgs};
 
-
 fn main() -> anyhow::Result<()> {
     // Get the command-line args
     let CommandLineArgs {
