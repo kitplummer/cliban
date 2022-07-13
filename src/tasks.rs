@@ -225,34 +225,42 @@ pub fn delete_task(config_path: PathBuf, id: u32) -> Result<()> {
     println!("No task with id {} found.", id);
     process::exit(1);
   }
-
   let mut position: usize = 0;
   let mut found: bool = false;
-
   for (i, _) in tasks.iter().enumerate() {
     if tasks[i].id == id {
       position = i;
       found = true;
     }
   }
+
   if !found {
       println!("No task with id {} found", id);
       process::exit(1);
   }
-  tasks.remove(position);
+  let task = &tasks[position];
 
+  let new_state = "deleted";
+  
+  let new_text = &task.text;
+  let mut new_task = Task::new(task.id, new_text.to_string());
+  new_task.state = String::from(new_state);
+
+  tasks.remove(position);
+  tasks.push(new_task);
   file.set_len(0)?;
-    // Write the modified task list back into the file;
   serde_json::to_writer(file, &tasks)?;
 
   if config.repaint {
     show_board(config_path, false)?;
   }
+
   Ok(())
 } 
 
 fn collect_tasks(mut file: &File) -> Result<Vec<Task>> {
     file.seek(SeekFrom::Start(0))?;
+
     let tasks = match serde_json::from_reader(file) {
         Ok(tasks) => tasks,
         Err(e) if e.is_eof() => Vec::new(),
