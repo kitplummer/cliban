@@ -58,9 +58,8 @@ $ `cliban configure`
 
 lots!
 
-* write default config to file
-* read config (data store) from default location
 * use --config override
+* column limits (e.g., max 3 tasks in-progress)
 * validate config
 * release process (including installables for package managers - e.g., winget, homebrew, etc.)
 
