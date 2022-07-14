@@ -1,10 +1,10 @@
 # cliban
 
-Personal kanban in the terminal.
+Personal kanban in the terminal/CLI.
 
 refactor of https://github.com/kitplummer/clikan in Rust for portability
 
-There has been a little chatter about 'personal' kanban on the tubes lately.  I don't know about the need to hype it as personal, but if you're looking to get your head wrapped around stuff needing to get done - then kanban is a healthy tool.  clikan is a super simple command-line utility for tracking tasks following the Japanese Kanban (boarding) style.  clikan's core intent is to be easy to use, and to maintain simplicity.
+There has been a little chatter about 'personal' kanban on the tubes lately.  I don't know about the need to hype it as personal, but if you're looking to get your head wrapped around stuff needing to get done - then kanban is a healthy tool.  cliban is a super simple command-line utility for tracking tasks following the Japanese Kanban (boarding) style.  cliban's core intent is to be easy to use, and to maintain simplicity.
 
 ![icon](docs/icon-256x256.png)
 
