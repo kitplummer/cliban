@@ -9,6 +9,20 @@ There has been a little chatter about 'personal' kanban on the tubes lately.  I 
 ![icon](docs/icon-256x256.png)
 
 ## using
+
+### configure
+
+$ `cliban configure` will drop a basic config file in `$HOME/.config/cliban.toml`
+
+It'll contain something that looks like this:
+```
+cliban_data = "C:\\Users\\kitplummer\\.cliban.json"
+repaint = true
+```
+
+`cliban_data` is the location of the tools data
+`repaint` is a configuration telling the tool to `show` the table after each command (default is `false`)
+
 The basic usage of `cliban` breaks down into three basic commands:
 
 ### show
@@ -44,9 +58,8 @@ $ `cliban configure`
 
 lots!
 
-* write default config to file
-* read config (data store) from default location
 * use --config override
+* column limits (e.g., max 3 tasks in-progress)
 * validate config
 * release process (including installables for package managers - e.g., winget, homebrew, etc.)
 
