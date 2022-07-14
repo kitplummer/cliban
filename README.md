@@ -4,6 +4,39 @@ Personal kanban in the terminal.
 
 refactor of https://github.com/kitplummer/clikan in Rust for portability
 
+There has been a little chatter about 'personal' kanban on the tubes lately.  I don't know about the need to hype it as personal, but if you're looking to get your head wrapped around stuff needing to get done - then kanban is a healthy tool.  clikan is a super simple command-line utility for tracking tasks following the Japanese Kanban (boarding) style.  clikan's core intent is to be easy to use, and to maintain simplicity.
+
+![icon](docs/icon-256x256.png)
+
+## using
+The basic usage of `cliban` breaks down into three basic commands:
+
+### show
+
+$ `cliban show`
+
+### add
+
+$ `cliban add [task text]`
+
+### promote
+
+$ `cliban promote [task id]`
+
+And there are more supporting commands:
+
+### regress
+
+$ `cliban regress [task id]`
+
+### delete
+
+$ `cliban delete [task id]`
+
+### configure
+
+$ `cliban configure`
+
 ## todo
 
 lots!
