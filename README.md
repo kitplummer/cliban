@@ -37,6 +37,9 @@ $ `cliban delete [task id]`
 
 $ `cliban configure`
 
+## screenshot
+
+![screenshot](docs/screenshot.png)
 ## todo
 
 lots!
