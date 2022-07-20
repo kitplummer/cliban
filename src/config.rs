@@ -7,6 +7,7 @@ use serde::{Deserialize, Serialize};
 pub struct Config {
     pub cliban_data: String,
     pub repaint: bool,
+    pub show: bool,
 }
 
 pub fn read_config(path: &Path) -> Config {
@@ -31,6 +32,7 @@ pub fn write_default_config() -> Result<(), ()> {
     let config = Config {
         cliban_data: default_data_path,
         repaint: false,
+        show: false,
     };
 
     let toml = toml::to_string(&config).unwrap();
