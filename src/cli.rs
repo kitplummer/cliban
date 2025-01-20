@@ -4,43 +4,38 @@ use structopt::StructOpt;
 #[derive(Debug, StructOpt)]
 pub enum Action {
     /// Create the intial configuration in ~/.config/cliban.toml.
-    Configure {
-    },
+    Configure {},
     /// Display the kanban board.
     Show {
         /// Display as JSON instead of the default table
         #[structopt(short, long)]
         json: bool,
     },
-    /// Create a new task in ToDo.
+    /// Create a new task - starts in ToDo.
     Add {
-    
         /// The task description text.
         #[structopt()]
-        task: String
+        task: String,
     },
     /// Promote the given task.
     Promote {
         #[structopt()]
-        id: u32
+        id: u32,
     },
     /// Regress the given task
     Regress {
         #[structopt()]
-        id: u32
+        id: u32,
     },
     /// Delete the given task
     Delete {
         #[structopt()]
-        id: u32
+        id: u32,
     },
 }
 
 #[derive(Debug, StructOpt)]
-#[structopt(
-    name = "cliban",
-    about = "A command-line kanban board written in Rust"
-)]
+#[structopt(name = "cliban", about = "A command-line kanban board written in Rust")]
 pub struct CommandLineArgs {
     #[structopt(subcommand)]
     pub action: Action,

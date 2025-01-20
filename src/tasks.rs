@@ -11,7 +11,7 @@ use std::process;
 
 use crate::config;
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct Task {
     pub text: String,
     pub state: String,
@@ -46,7 +46,7 @@ pub fn show_board(config_path: PathBuf, json: bool) -> Result<()> {
         .read(true)
         .write(true)
         .create(true)
-        .truncate(true)
+        .truncate(false)
         .open(expanded_path.into_owned())?;
     let tasks = collect_tasks(&file)?;
     if json {
@@ -60,10 +60,11 @@ pub fn show_board(config_path: PathBuf, json: bool) -> Result<()> {
             .set_content_arrangement(ContentArrangement::Dynamic)
             .set_header(vec![
                 Cell::new("ToDo").fg(Color::Yellow),
-                Cell::new("In-Progress").fg(Color::Green),
+                Cell::new("In-Progress (max 3)").fg(Color::Green),
                 Cell::new(done_header).fg(Color::Red),
             ])
             .add_row(vec![columns.0, columns.1, columns.2]);
+
         println!("{}", table);
     }
     Ok(())
@@ -76,7 +77,7 @@ pub fn add_task(config_path: PathBuf, new_task: String) -> Result<()> {
         .read(true)
         .write(true)
         .create(true)
-        .truncate(true)
+        .truncate(false)
         .open(expanded_path.into_owned())?;
 
     let mut tasks = collect_tasks(&file)?;
@@ -99,7 +100,7 @@ pub fn promote_task(config_path: PathBuf, id: u32) -> Result<()> {
         .read(true)
         .write(true)
         .create(true)
-        .truncate(true)
+        .truncate(false)
         .open(expanded_path.into_owned())?;
 
     let mut tasks = collect_tasks(&file)?;
@@ -109,6 +110,8 @@ pub fn promote_task(config_path: PathBuf, id: u32) -> Result<()> {
         println!("No task with id {} found.", id);
         process::exit(1);
     }
+
+    let ip_count = in_progress_count(tasks.clone());
 
     let mut position: usize = 0;
     let mut found: bool = false;
@@ -127,7 +130,17 @@ pub fn promote_task(config_path: PathBuf, id: u32) -> Result<()> {
 
     let task = &tasks[position];
     let new_state = match task.state.as_str() {
-        "todo" => "in-progress",
+        "todo" => {
+            if ip_count >= 3 {
+                println!(
+                    "Can not promote {}. Already three tasks In-Progress - Kanban principle.",
+                    id
+                );
+                process::exit(1);
+            } else {
+                "in-progress"
+            }
+        }
         "in-progress" => "done",
         "done" => {
             println!("Task {} already done.", task.id);
@@ -162,7 +175,7 @@ pub fn regress_task(config_path: PathBuf, id: u32) -> Result<()> {
         .read(true)
         .write(true)
         .create(true)
-        .truncate(true)
+        .truncate(false)
         .open(expanded_path.into_owned())?;
 
     let mut tasks = collect_tasks(&file)?;
@@ -194,8 +207,19 @@ pub fn regress_task(config_path: PathBuf, id: u32) -> Result<()> {
             println!("Task {} already in todo.", task.id);
             process::exit(1);
         }
+        "done" => {
+            let ip_count = in_progress_count(tasks.clone());
+            if ip_count >= 3 {
+                println!(
+                    "Can not regress {}.  Already three items In-Progress - Kanban principle.",
+                    id
+                );
+                process::exit(1);
+            } else {
+                "in-progress"
+            }
+        }
         "in-progress" => "todo",
-        "done" => "in-progress",
         _ => {
             println!("No task found.");
             process::exit(1);
@@ -225,7 +249,7 @@ pub fn delete_task(config_path: PathBuf, id: u32) -> Result<()> {
         .read(true)
         .write(true)
         .create(true)
-        .truncate(true)
+        .truncate(false)
         .open(expanded_path.into_owned())?;
 
     let mut tasks = collect_tasks(&file)?;
@@ -318,4 +342,9 @@ fn get_columns(tasks: Vec<Task>, done_limit: i8) -> (String, String, String) {
         inprogs_string.trim_end().to_string(),
         dones_string.trim_end().to_string(),
     )
+}
+
+pub fn in_progress_count(tasks: Vec<Task>) -> usize {
+    let columns = get_columns(tasks, 0);
+    columns.1.split("\n").count()
 }
